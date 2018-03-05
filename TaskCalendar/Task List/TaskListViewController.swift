@@ -92,15 +92,19 @@ class TaskListViewController: UITableViewController, TaskManagerChangeObserver, 
         self.didComplete?(self.taskManager.tasks[indexPath.row])
     }
 
-    func taskManagerDidAddTask(at index: Int) {
-        self.tableView.insertRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+    private func indexPath(for task: Task) -> IndexPath {
+        return IndexPath(row: self.taskManager.tasks.index { $0.id == task.id }!, section: 0)
     }
 
-    func taskManagerDidUpdateTask(at index: Int) {
-        self.tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+    func taskManagerDidAdd(task: Task) {
+        self.tableView.insertRows(at: [self.indexPath(for: task)], with: .automatic)
     }
 
-    func taskManagerDidCompleteTask(at index: Int) {
-        self.tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
+    func taskManagerDidUpdate(task: Task) {
+        self.tableView.reloadRows(at: [self.indexPath(for: task)], with: .automatic)
+    }
+
+    func taskManagerDidComplete(task: Task) {
+        self.tableView.deleteRows(at: [self.indexPath(for: task)], with: .automatic)
     }
 }

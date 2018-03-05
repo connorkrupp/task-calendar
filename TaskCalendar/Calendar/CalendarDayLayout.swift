@@ -15,7 +15,7 @@ protocol CalendarDayLayoutDataSource: UICollectionViewDelegate {
     func startPartialRowForItem(at indexPath: IndexPath) -> Double
     func endPartialRowForItem(at indexPath: IndexPath) -> Double
 
-    func didMoveItem(at indexPath: IndexPath, to partialRow: Double)
+    func didMoveItem(at indexPath: IndexPath, to partialRow: Double, in section: Int)
 }
 
 class CalendarDayLayout: UICollectionViewLayout {
@@ -53,6 +53,12 @@ class CalendarDayLayout: UICollectionViewLayout {
     let rowHeight: CGFloat = 55.0
     let separatorHeight: CGFloat = 22.0
 
+    private func heightFor(sections: CountableRange<Int>) -> CGFloat {
+        return sections.reduce(0.0, { (offset, section) in
+            return offset + self.heightFor(section: section)
+        })
+    }
+
     private func heightFor(section: Int) -> CGFloat {
         return self.rowHeight * CGFloat(self.dataSource.numberOfRowsIn(section: section))
     }
@@ -78,7 +84,7 @@ class CalendarDayLayout: UICollectionViewLayout {
     }
 
     override func prepare() {
-        self.contentSize = CGSize(width: self.collectionView!.bounds.size.width, height: self.heightFor(section: 0))
+        self.contentSize = CGSize(width: self.collectionView!.bounds.size.width, height: self.heightFor(sections: self.sectionRange))
         self.cellLayoutAttributes = (0..<(self.collectionView?.numberOfSections ?? 0)).map { layoutAttributesFor(section: $0) }
 
         self.installLongPressGestureRecognizer()
@@ -123,7 +129,6 @@ class CalendarDayLayout: UICollectionViewLayout {
             let cell = self.collectionView?.cellForItem(at: indexPath),
             let draggingView = cell.snapshotView(afterScreenUpdates: true) else { return }
 
-
         draggingView.frame = cell.frame
 
         self.collectionView?.addSubview(draggingView)
@@ -153,9 +158,12 @@ class CalendarDayLayout: UICollectionViewLayout {
     func endDragAt(location: CGPoint) {
         guard let dragInfo = self.dragInfo else { return }
 
-        let dropLocation = location.y + dragInfo.offset.y - dragInfo.view.frame.size.height / 2
-        let numRows = CGFloat(self.dataSource.numberOfRowsIn(section: 0))
-        let partialRow = dropLocation / self.contentSize.height * numRows
+        let dropLocation = CGPoint(x: location.x, y: location.y + dragInfo.offset.y - dragInfo.view.frame.size.height / 2)
+
+        let section = self.section(at: dropLocation)!
+        let sectionOffset = self.heightFor(sections: 0..<section)
+        let numRows = CGFloat(self.dataSource.numberOfRowsIn(section: section))
+        let partialRow = (dropLocation.y - sectionOffset) / self.heightFor(section: section) * numRows
         let fullRow = floor(partialRow)
         let rounded = round(partialRow * 10) / 10
         let tenthsPlace = round((rounded - floor(rounded)) * 10)
@@ -163,9 +171,23 @@ class CalendarDayLayout: UICollectionViewLayout {
         let row = Double(tenthsPlace < 5 ? fullRow : fullRow + 0.5)
 
         dragInfo.view.removeFromSuperview()
-        self.dataSource.didMoveItem(at: dragInfo.indexPath, to: row)
+        self.dataSource.didMoveItem(at: dragInfo.indexPath, to: row, in: section)
         self.dragInfo = nil
         self.invalidateLayout()
+    }
+
+    private func section(at location: CGPoint) -> Int? {
+        var offset: CGFloat = 0
+
+        for section in self.sectionRange {
+            offset += self.heightFor(section: section)
+
+            if (location.y < offset) {
+                return section
+            }
+        }
+
+        return nil
     }
 
     // MARK: Building Layout Attributes
@@ -178,7 +200,7 @@ class CalendarDayLayout: UICollectionViewLayout {
             let startRow = self.dataSource.startPartialRowForItem(at: indexPath)
             let endRow = self.dataSource.endPartialRowForItem(at: indexPath)
 
-            let sectionOffset: CGFloat = 0
+            let sectionOffset: CGFloat = self.heightFor(sections: 0..<indexPath.section)
 
             let startOffset = sectionOffset + CGFloat(startRow) * self.rowHeight
             let endOffset = sectionOffset + CGFloat(endRow) * self.rowHeight
@@ -203,7 +225,7 @@ class CalendarDayLayout: UICollectionViewLayout {
                 return self.layoutAttributesForItem(at: IndexPath(item: item, section: section))!
             }
 
-            return separatorLayoutAttributes + cellLayoutAttributes
+            return layoutAttributes + separatorLayoutAttributes + cellLayoutAttributes
         }
 
         return layoutAttributes
@@ -213,11 +235,11 @@ class CalendarDayLayout: UICollectionViewLayout {
         let layoutAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: elementKind, with: indexPath)
 
         let headerHeight: CGFloat = 0
-        let sectionOffset: CGFloat = 0
+        let sectionOffset: CGFloat = self.heightFor(sections: 0..<indexPath.section)
 
         switch SupplementaryViewKind(rawValue: elementKind)! {
         case .Separator:
-            layoutAttributes.frame = CGRect(x: 0.0, y: sectionOffset + headerHeight + CGFloat(indexPath.row) * rowHeight - separatorHeight / 2.0, width: contentSize.width, height: separatorHeight)
+            layoutAttributes.frame = CGRect(x: 0.0, y: sectionOffset + headerHeight + CGFloat(indexPath.row) * rowHeight - separatorHeight / 2.0, width: contentSize.width, height: self.separatorHeight)
             layoutAttributes.zIndex = -1
         }
 

@@ -19,35 +19,32 @@ class CalendarViewController: UICollectionViewController, CalendarDayLayoutDataS
     // MARK: CalendarDayLayoutDelegate
 
     func numberOfRowsIn(section: Int) -> Int {
-        return Time.numberOfHoursInDay * Time.numberOfDaysShown
+        return Time.numberOfHoursInDay
     }
 
     func startPartialRowForItem(at indexPath: IndexPath) -> Double {
-        let task = self.taskManager.tasks[indexPath.row]
+        let task = self.task(for: indexPath)
 
         guard let today = Time.today, let offset = task.offsetFrom(date: today) else { return 0.0 }
 
-        return offset.totalHours()
+        return Double(offset.hours) + Double(offset.minutes) / Double(Time.numberOfMinutesInHour)
     }
 
     func endPartialRowForItem(at indexPath: IndexPath) -> Double {
-        let task = self.taskManager.tasks[indexPath.row]
+        let task = self.task(for: indexPath)
         let workTimeHours = Double(task.workTime!.duration) / Double(Time.numberOfMinutesInHour)
 
         return self.startPartialRowForItem(at: indexPath) + workTimeHours
     }
 
-    func didMoveItem(at indexPath: IndexPath, to partialRow: Double) {
-        let task = self.taskManager.tasks[indexPath.row]
-        guard let today = Time.today, let offset = task.offsetFrom(date: today), let workTime = task.workTime else { return }
+    func didMoveItem(at indexPath: IndexPath, to partialRow: Double, in section: Int) {
+        let task = self.task(for: indexPath)
+        guard let workTime = task.workTime else { return }
 
         var components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: workTime.startDate)
 
-        let totalHours = Int(floor(partialRow))
-        let dayOffset = totalHours / 24 - offset.days
-
-        components.day = components.day! + dayOffset
-        components.hour = totalHours % 24
+        components.day = self.firstDayInView + section
+        components.hour = Int(floor(partialRow))
         components.minute = Int((partialRow - floor(partialRow)) * Double(Time.numberOfMinutesInHour))
 
         task.workTime = Task.WorkTimeInfo(startDate: Calendar.current.date(from: components)!, duration: workTime.duration)
@@ -83,18 +80,31 @@ class CalendarViewController: UICollectionViewController, CalendarDayLayoutDataS
         self.taskManager.unregister(self)
     }
 
+    func tasksInDay(day: Int) -> [Task] {
+        return self.taskManager.tasks.filter({ (task) -> Bool in
+            let components = Calendar.current.dateComponents([.day], from: task.workTime!.startDate)
+
+            return components.day! == day
+        })
+    }
+
+    var firstDayInView: Int {
+        let components = Calendar.current.dateComponents([.day], from: Time.today!)
+
+        return components.day!
+    }
+
     override func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return 1
+        return 5
     }
 
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return self.taskManager.tasks.count
+        return self.tasksInDay(day: self.firstDayInView + section).count
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = self.collectionView?.dequeueReusableCell(withReuseIdentifier: "asdf", for: indexPath) as! CalendarEventCollectionViewCell
-        let task = self.taskManager.tasks[indexPath.row]
-
+        let task = self.tasksInDay(day: self.firstDayInView + indexPath.section)[indexPath.row]
         cell.nameLabel.text = task.name
         cell.backgroundColor = task.color.uiColor
 
@@ -102,7 +112,7 @@ class CalendarViewController: UICollectionViewController, CalendarDayLayoutDataS
     }
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        self.didSelect?(self.taskManager.tasks[indexPath.row])
+        self.didSelect?(self.task(for: indexPath))
     }
 
     override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
@@ -120,16 +130,28 @@ class CalendarViewController: UICollectionViewController, CalendarDayLayoutDataS
 
     // MARK: TaskManagerChangeObserver
 
-    func taskManagerDidAddTask(at index: Int) {
-        self.collectionView?.insertItems(at: [IndexPath(row: index, section: 0)])
+    private func task(for indexPath: IndexPath) -> Task {
+        return self.tasksInDay(day: self.firstDayInView + indexPath.section)[indexPath.row]
     }
 
-    func taskManagerDidUpdateTask(at index: Int) {
-        self.collectionView?.reloadItems(at: [IndexPath(row: index, section: 0)])
+    private func indexPath(for task: Task) -> IndexPath {
+        let section = task.offsetFrom(date: Time.today!)!.days
+        let row = self.tasksInDay(day: self.firstDayInView + section).index { $0.id == task.id }!
+
+        return IndexPath(row: row, section: section)
     }
 
-    func taskManagerDidCompleteTask(at index: Int) {
-        self.collectionView?.deleteItems(at: [IndexPath(row: index, section: 0)])
+    func taskManagerDidAdd(task: Task) {
+        self.collectionView?.insertItems(at: [self.indexPath(for: task)])
+    }
+
+    func taskManagerDidUpdate(task: Task) {
+        self.collectionView?.reloadData()
+        //self.collectionView?.reloadItems(at: [self.indexPath(for: task)])
+    }
+
+    func taskManagerDidComplete(task: Task) {
+        self.collectionView?.deleteItems(at: [self.indexPath(for: task)])
     }
 }
 

@@ -12,9 +12,9 @@ import Foundation
  Protocol for TaskManager notifying observers of changes in available tasks.
  */
 protocol TaskManagerChangeObserver: class {
-    func taskManagerDidAddTask(at index: Int)
-    func taskManagerDidUpdateTask(at index: Int)
-    func taskManagerDidCompleteTask(at index: Int)
+    func taskManagerDidAdd(task: Task)
+    func taskManagerDidUpdate(task: Task)
+    func taskManagerDidComplete(task: Task)
 }
 
 class TaskManager {
@@ -35,13 +35,8 @@ class TaskManager {
     }
 
     func save(task: Task) {
-        guard let index = self.tasks.index(where: { $0.id == task.id }) else {
-            assertionFailure("Error: Saving task that does not exist in Task Manager.")
-            return
-        }
-
         for observer in self.observers {
-            observer.taskManagerDidUpdateTask(at: index)
+            observer.taskManagerDidUpdate(task: task)
         }
 
         self.save()
@@ -51,7 +46,7 @@ class TaskManager {
         self.tasks.append(task)
 
         for observer in self.observers {
-            observer.taskManagerDidAddTask(at: self.tasks.count - 1)
+            observer.taskManagerDidAdd(task: task)
         }
 
         self.save()
@@ -66,7 +61,7 @@ class TaskManager {
         self.tasks.remove(at: index)
 
         for observer in self.observers {
-            observer.taskManagerDidCompleteTask(at: index)
+            observer.taskManagerDidComplete(task: task)
         }
 
         self.save()
