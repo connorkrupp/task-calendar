@@ -127,6 +127,8 @@ class TaskViewController: UITableViewController, UIPickerViewDataSource, UIPicke
         self.task.subtitle = self.subtitleCell.textField.text
         self.task.dueDate = self.dueDateCell.date
         self.task.workTime = Task.WorkTimeInfo(startDate: self.dateCell.date, duration: hours * 60 + minutes)
+        let colorOptions = [Task.EventColor.red, Task.EventColor.blue, Task.EventColor.green, Task.EventColor.orange, Task.EventColor.lightBlue]
+        self.task.color = colorOptions[Int(arc4random_uniform(UInt32(colorOptions.count)))]
         
         self.saveTask?(self.task)
     }

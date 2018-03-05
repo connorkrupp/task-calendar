@@ -27,6 +27,8 @@
 		70C7ADBB204CE3B0007E0DAD /* PickerTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C7ADBA204CE3B0007E0DAD /* PickerTableViewCell.swift */; };
 		70C7ADBD204CE8E6007E0DAD /* ProjectListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C7ADBC204CE8E6007E0DAD /* ProjectListViewController.swift */; };
 		70C7ADC0204CE945007E0DAD /* Project.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C7ADBF204CE945007E0DAD /* Project.swift */; };
+		70C7ADC2204D89B1007E0DAD /* Time.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C7ADC1204D89B1007E0DAD /* Time.swift */; };
+		70C7ADC4204D9C77007E0DAD /* ScheduleDaySeparator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C7ADC3204D9C77007E0DAD /* ScheduleDaySeparator.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -52,6 +54,8 @@
 		70C7ADBA204CE3B0007E0DAD /* PickerTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickerTableViewCell.swift; sourceTree = "<group>"; };
 		70C7ADBC204CE8E6007E0DAD /* ProjectListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectListViewController.swift; sourceTree = "<group>"; };
 		70C7ADBF204CE945007E0DAD /* Project.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Project.swift; sourceTree = "<group>"; };
+		70C7ADC1204D89B1007E0DAD /* Time.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Time.swift; sourceTree = "<group>"; };
+		70C7ADC3204D9C77007E0DAD /* ScheduleDaySeparator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleDaySeparator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,6 +95,7 @@
 				70C7ADAC204C7170007E0DAD /* Task List */,
 				70C7ADAB204C7161007E0DAD /* Calendar */,
 				70C7AD9D204B9A02007E0DAD /* Task.swift */,
+				70C7ADC1204D89B1007E0DAD /* Time.swift */,
 				70C7ADBF204CE945007E0DAD /* Project.swift */,
 				70C7AD9F204B9A57007E0DAD /* TaskManager.swift */,
 				70C7ADB8204CA042007E0DAD /* Storage.swift */,
@@ -108,6 +113,7 @@
 				70C7AD8D204B99E0007E0DAD /* CalendarViewController.swift */,
 				70C7ADA7204C53C2007E0DAD /* CalendarDayLayout.swift */,
 				70C7ADA9204C5C2C007E0DAD /* ScheduleHourSeparator.swift */,
+				70C7ADC3204D9C77007E0DAD /* ScheduleDaySeparator.swift */,
 				70C7ADAD204C7362007E0DAD /* CalendarEventCollectionViewCell.swift */,
 			);
 			path = Calendar;
@@ -213,6 +219,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				70C7ADA8204C53C2007E0DAD /* CalendarDayLayout.swift in Sources */,
+				70C7ADC2204D89B1007E0DAD /* Time.swift in Sources */,
 				70C7ADAE204C7362007E0DAD /* CalendarEventCollectionViewCell.swift in Sources */,
 				70C7ADB0204C757B007E0DAD /* Utilities.swift in Sources */,
 				70C7ADAA204C5C2C007E0DAD /* ScheduleHourSeparator.swift in Sources */,
@@ -220,6 +227,7 @@
 				70C7ADBB204CE3B0007E0DAD /* PickerTableViewCell.swift in Sources */,
 				70C7ADB7204C8C14007E0DAD /* DatePickerTableViewCell.swift in Sources */,
 				70C7ADBD204CE8E6007E0DAD /* ProjectListViewController.swift in Sources */,
+				70C7ADC4204D9C77007E0DAD /* ScheduleDaySeparator.swift in Sources */,
 				70C7ADB2204C82D3007E0DAD /* TaskViewController.swift in Sources */,
 				70C7ADB4204C88B4007E0DAD /* TextFieldTableViewCell.swift in Sources */,
 				70C7AD8E204B99E0007E0DAD /* CalendarViewController.swift in Sources */,

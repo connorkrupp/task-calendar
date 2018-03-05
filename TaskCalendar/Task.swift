@@ -57,4 +57,26 @@ class Task: Codable {
     var subtitle: String? = nil
     var dueDate: Date? = nil
     var color: EventColor = EventColor.orange
+
+    func offsetFrom(date other: Date) -> Time.Offset? {
+        guard let workTime = self.workTime else { return nil }
+
+        let components = Calendar.current.dateComponents([.day, .hour, .minute], from: workTime.startDate)
+        let otherComponents = Calendar.current.dateComponents([.day, .hour, .minute], from: other)
+
+        let dayComponent = components.day
+        let hourComponent = components.hour
+        let minutesComponent = components.minute
+
+        let otherDayComponent = otherComponents.day
+        let otherHourComponent = otherComponents.hour
+        let otherMinutesComponent = otherComponents.minute
+
+        guard
+            let day = dayComponent, let hour = hourComponent, let minutes = minutesComponent,
+            let otherDay = otherDayComponent, let otherHour = otherHourComponent,
+            let otherMinutes = otherMinutesComponent else { return nil }
+
+        return Time.Offset(days: day - otherDay, hours: hour - otherHour, minutes: minutes - otherMinutes)
+    }
 }

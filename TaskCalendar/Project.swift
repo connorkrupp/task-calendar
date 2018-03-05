@@ -8,6 +8,10 @@
 
 import Foundation
 
-struct Project {
+class Project {
     let name: String
+
+    init(name: String) {
+        self.name = name
+    }
 }

@@ -19,34 +19,38 @@ class CalendarViewController: UICollectionViewController, CalendarDayLayoutDataS
     // MARK: CalendarDayLayoutDelegate
 
     func numberOfRowsIn(section: Int) -> Int {
-        return 24
+        return Time.numberOfHoursInDay * Time.numberOfDaysShown
     }
 
     func startPartialRowForItem(at indexPath: IndexPath) -> Double {
         let task = self.taskManager.tasks[indexPath.row]
-        let components = Calendar.current.dateComponents([.hour, .minute], from: task.workTime!.startDate)
 
-        let hour = Double(components.hour!)
-        let minutes = Double(components.minute!)
+        guard let today = Time.today, let offset = task.offsetFrom(date: today) else { return 0.0 }
 
-        return hour + minutes / 60
+        return offset.totalHours()
     }
 
     func endPartialRowForItem(at indexPath: IndexPath) -> Double {
         let task = self.taskManager.tasks[indexPath.row]
+        let workTimeHours = Double(task.workTime!.duration) / Double(Time.numberOfMinutesInHour)
 
-        return self.startPartialRowForItem(at: indexPath) + Double(task.workTime!.duration) / 60
+        return self.startPartialRowForItem(at: indexPath) + workTimeHours
     }
 
     func didMoveItem(at indexPath: IndexPath, to partialRow: Double) {
         let task = self.taskManager.tasks[indexPath.row]
-        var components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute, .second], from: task.workTime!.startDate)
+        guard let today = Time.today, let offset = task.offsetFrom(date: today), let workTime = task.workTime else { return }
 
-        let hour = floor(partialRow)
-        components.hour = Int(hour)
-        components.minute = Int((partialRow - hour) * 60)
+        var components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: workTime.startDate)
 
-        task.workTime = Task.WorkTimeInfo(startDate: Calendar.current.date(from: components)!, duration: task.workTime!.duration)
+        let totalHours = Int(floor(partialRow))
+        let dayOffset = totalHours / 24 - offset.days
+
+        components.day = components.day! + dayOffset
+        components.hour = totalHours % 24
+        components.minute = Int((partialRow - floor(partialRow)) * Double(Time.numberOfMinutesInHour))
+
+        task.workTime = Task.WorkTimeInfo(startDate: Calendar.current.date(from: components)!, duration: workTime.duration)
 
         self.didMove?(task)
     }
@@ -108,7 +112,7 @@ class CalendarViewController: UICollectionViewController, CalendarDayLayoutDataS
 
             let hour = indexPath.row % 12
 
-            hourSeparator.hourLabel.text = "\(hour == 0 ? 12 : hour) \(indexPath.row < 12 ? "AM" : "PM" )"
+            hourSeparator.hourLabel.text = "\(hour == 0 ? 12 : hour) \((indexPath.row % 24) < 12 ? "AM" : "PM" )"
 
             return hourSeparator
         }
