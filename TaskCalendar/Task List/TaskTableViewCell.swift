@@ -8,48 +8,61 @@
 
 import UIKit
 
+protocol TaskTableViewCellDelegate: class {
+    func taskTableViewCell(_ cell: TaskTableViewCell, didTapCompletionButton button: UIButton)
+}
+
 class TaskTableViewCell: UITableViewCell {
 
     static let identifier = "TaskTableViewCell"
 
-    let titleTextField = UITextField()
-    let durationLabel = UILabel()
-    let bodyTextView = UITextView()
-    let datePicker = UIDatePicker()
-    let durationPicker = UIPickerView()
+    weak var delegate: TaskTableViewCellDelegate? = nil
 
-    var isExpanded = false {
-        didSet {
-            self.bodyTextView.isHidden = !isExpanded
-            self.datePicker.isHidden = !isExpanded
-            self.durationPicker.isHidden = !isExpanded
-        }
-    }
+    let completionButton = UIButton(type: UIButtonType.roundedRect)
+    let titleLabel = UILabel()
+    let subtitleLabel = UILabel()
+    let dueDateLabel = UILabel()
 
     override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
 
-        self.bodyTextView.isHidden = !isExpanded
-        self.datePicker.isHidden = !isExpanded
-        self.durationPicker.isHidden = !isExpanded
+        completionButton.backgroundColor = UIColor.clear
+        completionButton.layer.cornerRadius = 4
+        completionButton.layer.borderWidth = 2
+        completionButton.layer.borderColor = UIColor.lightGray.cgColor
+        completionButton.addTarget(self, action: #selector(didTapCompletionButton(sender:)), for: .touchUpInside)
 
-        let titleStackView = UIStackView(arrangedSubviews: [titleTextField, durationLabel])
-        titleStackView.axis = .horizontal
-        titleStackView.alignment = .firstBaseline
-        titleStackView.distribution = .equalSpacing
+        titleLabel.font = UIFont.preferredFont(forTextStyle: .headline)
+        subtitleLabel.font = UIFont.preferredFont(forTextStyle: .footnote)
+        dueDateLabel.font = UIFont.preferredFont(forTextStyle: .callout)
 
-        let cellStackView = UIStackView(arrangedSubviews: [titleStackView, bodyTextView, datePicker, durationPicker])
-        cellStackView.axis = .vertical
-        cellStackView.alignment = .fill
-        cellStackView.distribution = .fillEqually
+        let titleStackView = UIStackView(arrangedSubviews: [titleLabel, subtitleLabel])
+        titleStackView.axis = .vertical
+        titleStackView.alignment = .leading
+        titleStackView.distribution = .fillEqually
+
+        let cellStackView = UIStackView(arrangedSubviews: [completionButton, titleStackView, dueDateLabel])
+        cellStackView.axis = .horizontal
+        cellStackView.alignment = .center
+        cellStackView.distribution = .fill
+        cellStackView.spacing = 14
         cellStackView.translatesAutoresizingMaskIntoConstraints = false
 
         self.addSubview(cellStackView)
 
-        cellStackView.constrain(within: self, constant: 20)
+        NSLayoutConstraint.activate([
+            completionButton.widthAnchor.constraint(equalToConstant: 20),
+            completionButton.heightAnchor.constraint(equalToConstant: 20),
+        ])
+
+        cellStackView.constrain(within: self, constant: 14)
     }
 
     required init?(coder aDecoder: NSCoder) {
         fatalError()
+    }
+
+    @objc func didTapCompletionButton(sender: UIButton) {
+        self.delegate?.taskTableViewCell(self, didTapCompletionButton: sender)
     }
 }

@@ -8,12 +8,14 @@
 
 import UIKit
 
-protocol CalendarDayLayoutDelegate: UICollectionViewDelegate {
+protocol CalendarDayLayoutDataSource: UICollectionViewDelegate {
 
     func numberOfRowsIn(section: Int) -> Int
 
-    func startRowForItem(at indexPath: IndexPath) -> Int
-    func endRowForItem(at indexPath: IndexPath) -> Int
+    func startPartialRowForItem(at indexPath: IndexPath) -> Double
+    func endPartialRowForItem(at indexPath: IndexPath) -> Double
+
+    func didMoveItem(at indexPath: IndexPath, to partialRow: Double)
 }
 
 class CalendarDayLayout: UICollectionViewLayout {
@@ -24,19 +26,25 @@ class CalendarDayLayout: UICollectionViewLayout {
         case Separator = "Separator"
     }
 
-    init(withDelegate delegate: CalendarDayLayoutDelegate) {
-        self.delegate = delegate
+    // MARK: Properties
+
+    var longPressGestureRecognizer: UILongPressGestureRecognizer!
+
+    // MARK: Initializers
+
+    init(withDataSource dataSource: CalendarDayLayoutDataSource) {
+        self.dataSource = dataSource
 
         super.init()
     }
 
     required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
+        fatalError()
     }
 
     // MARK: Delegate
 
-    var delegate: CalendarDayLayoutDelegate? = nil
+    var dataSource: CalendarDayLayoutDataSource
 
     override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
         return true
@@ -46,7 +54,7 @@ class CalendarDayLayout: UICollectionViewLayout {
     let separatorHeight: CGFloat = 22.0
 
     private func heightFor(section: Int) -> CGFloat {
-        return self.rowHeight * CGFloat(self.delegate?.numberOfRowsIn(section: section) ?? 0)
+        return self.rowHeight * CGFloat(self.dataSource.numberOfRowsIn(section: section))
     }
 
     // MARK: Cache
@@ -72,15 +80,103 @@ class CalendarDayLayout: UICollectionViewLayout {
     override func prepare() {
         self.contentSize = CGSize(width: self.collectionView!.bounds.size.width, height: self.heightFor(section: 0))
         self.cellLayoutAttributes = (0..<(self.collectionView?.numberOfSections ?? 0)).map { layoutAttributesFor(section: $0) }
+
+        self.installLongPressGestureRecognizer()
     }
+
+    // MARK: Dragging
+
+    fileprivate func installLongPressGestureRecognizer() {
+        if longPressGestureRecognizer == nil {
+            longPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(longPressGestureRecognizer:)))
+            longPressGestureRecognizer.minimumPressDuration = 0.2
+            self.collectionView?.addGestureRecognizer(longPressGestureRecognizer)
+        }
+    }
+
+    private struct DragInfo {
+        var indexPath: IndexPath
+        var view: UIView
+        var offset: CGPoint
+    }
+
+    @objc func handleLongPress(longPressGestureRecognizer: UILongPressGestureRecognizer) {
+        let location = longPressGestureRecognizer.location(in: self.collectionView!)
+
+        switch longPressGestureRecognizer.state {
+        case .began:
+            self.startDragAt(location: location)
+        case .changed:
+            self.updateDragAt(location: location)
+        case .ended:
+            self.endDragAt(location: location)
+        default:
+            break
+        }
+    }
+
+    private var dragInfo: DragInfo? = nil
+
+    func startDragAt(location: CGPoint) {
+        guard
+            let indexPath = self.collectionView?.indexPathForItem(at: location),
+            let cell = self.collectionView?.cellForItem(at: indexPath),
+            let draggingView = cell.snapshotView(afterScreenUpdates: true) else { return }
+
+
+        draggingView.frame = cell.frame
+
+        self.collectionView?.addSubview(draggingView)
+
+        let dragOffset = CGPoint(x: draggingView.center.x - location.x, y: draggingView.center.y - location.y)
+
+        draggingView.layer.shadowPath = UIBezierPath(rect: draggingView.bounds).cgPath
+        draggingView.layer.shadowColor = UIColor.black.cgColor
+        draggingView.layer.shadowOpacity = 0.9
+        draggingView.layer.shadowRadius = 2
+
+        self.invalidateLayout()
+
+        UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 0.4, initialSpringVelocity: 0, options: [], animations: {
+            draggingView.alpha = 0.95
+        }, completion: nil)
+
+        self.dragInfo = DragInfo(indexPath: indexPath, view: draggingView, offset: dragOffset)
+    }
+
+    func updateDragAt(location: CGPoint) {
+        guard let dragInfo = self.dragInfo else { return }
+
+        dragInfo.view.center = CGPoint(x: location.x + dragInfo.offset.x, y: location.y + dragInfo.offset.y)
+    }
+
+    func endDragAt(location: CGPoint) {
+        guard let dragInfo = self.dragInfo else { return }
+
+        let dropLocation = location.y + dragInfo.offset.y - dragInfo.view.frame.size.height / 2
+        let numRows = CGFloat(self.dataSource.numberOfRowsIn(section: 0))
+        let partialRow = dropLocation / self.contentSize.height * numRows
+        let fullRow = floor(partialRow)
+        let rounded = round(partialRow * 10) / 10
+        let tenthsPlace = round((rounded - floor(rounded)) * 10)
+
+        let row = Double(tenthsPlace < 5 ? fullRow : fullRow + 0.5)
+
+        dragInfo.view.removeFromSuperview()
+        self.dataSource.didMoveItem(at: dragInfo.indexPath, to: row)
+        self.dragInfo = nil
+        self.invalidateLayout()
+    }
+
+    // MARK: Building Layout Attributes
 
     private func layoutAttributesFor(section: Int) -> [UICollectionViewLayoutAttributes] {
         return (0..<self.collectionView!.numberOfItems(inSection: section)).map { item in
             let indexPath = IndexPath(item: item, section: section)
             let layoutAttributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
 
-            let startRow = self.delegate?.startRowForItem(at: indexPath) ?? 0
-            let endRow = self.delegate?.endRowForItem(at: indexPath) ?? 0
+            let startRow = self.dataSource.startPartialRowForItem(at: indexPath)
+            let endRow = self.dataSource.endPartialRowForItem(at: indexPath)
 
             let sectionOffset: CGFloat = 0
 
@@ -99,7 +195,7 @@ class CalendarDayLayout: UICollectionViewLayout {
     override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes] {
         let layoutAttributes = sectionRange.reduce([UICollectionViewLayoutAttributes]()) { layoutAttributes, section in
 
-            let separatorLayoutAttributes: [UICollectionViewLayoutAttributes] = (1..<(self.delegate?.numberOfRowsIn(section: section) ?? 1)).map { row in
+            let separatorLayoutAttributes: [UICollectionViewLayoutAttributes] = (1..<(self.dataSource.numberOfRowsIn(section: section))).map { row in
                 return self.layoutAttributesForSupplementaryView(ofKind: SupplementaryViewKind.Separator.rawValue, at: IndexPath(item: row, section: section))!
             }
 

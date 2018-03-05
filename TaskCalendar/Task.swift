@@ -51,8 +51,10 @@ class Task: Codable {
         let duration: Int
     }
 
-    var workTimes = [WorkTimeInfo]()
+    let id = UUID()
+    var workTime: WorkTimeInfo? = nil
     var name: String? = nil
-    var body: String? = nil
+    var subtitle: String? = nil
+    var dueDate: Date? = nil
     var color: EventColor = EventColor.orange
 }

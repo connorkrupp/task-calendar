@@ -20,6 +20,13 @@
 		70C7ADAA204C5C2C007E0DAD /* ScheduleHourSeparator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C7ADA9204C5C2C007E0DAD /* ScheduleHourSeparator.swift */; };
 		70C7ADAE204C7362007E0DAD /* CalendarEventCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C7ADAD204C7362007E0DAD /* CalendarEventCollectionViewCell.swift */; };
 		70C7ADB0204C757B007E0DAD /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C7ADAF204C757B007E0DAD /* Utilities.swift */; };
+		70C7ADB2204C82D3007E0DAD /* TaskViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C7ADB1204C82D3007E0DAD /* TaskViewController.swift */; };
+		70C7ADB4204C88B4007E0DAD /* TextFieldTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C7ADB3204C88B4007E0DAD /* TextFieldTableViewCell.swift */; };
+		70C7ADB7204C8C14007E0DAD /* DatePickerTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C7ADB6204C8C14007E0DAD /* DatePickerTableViewCell.swift */; };
+		70C7ADB9204CA042007E0DAD /* Storage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C7ADB8204CA042007E0DAD /* Storage.swift */; };
+		70C7ADBB204CE3B0007E0DAD /* PickerTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C7ADBA204CE3B0007E0DAD /* PickerTableViewCell.swift */; };
+		70C7ADBD204CE8E6007E0DAD /* ProjectListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C7ADBC204CE8E6007E0DAD /* ProjectListViewController.swift */; };
+		70C7ADC0204CE945007E0DAD /* Project.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70C7ADBF204CE945007E0DAD /* Project.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +45,13 @@
 		70C7ADA9204C5C2C007E0DAD /* ScheduleHourSeparator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleHourSeparator.swift; sourceTree = "<group>"; };
 		70C7ADAD204C7362007E0DAD /* CalendarEventCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarEventCollectionViewCell.swift; sourceTree = "<group>"; };
 		70C7ADAF204C757B007E0DAD /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
+		70C7ADB1204C82D3007E0DAD /* TaskViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskViewController.swift; sourceTree = "<group>"; };
+		70C7ADB3204C88B4007E0DAD /* TextFieldTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFieldTableViewCell.swift; sourceTree = "<group>"; };
+		70C7ADB6204C8C14007E0DAD /* DatePickerTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatePickerTableViewCell.swift; sourceTree = "<group>"; };
+		70C7ADB8204CA042007E0DAD /* Storage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Storage.swift; sourceTree = "<group>"; };
+		70C7ADBA204CE3B0007E0DAD /* PickerTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickerTableViewCell.swift; sourceTree = "<group>"; };
+		70C7ADBC204CE8E6007E0DAD /* ProjectListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProjectListViewController.swift; sourceTree = "<group>"; };
+		70C7ADBF204CE945007E0DAD /* Project.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Project.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,10 +87,14 @@
 				70C7AD8B204B99E0007E0DAD /* AppDelegate.swift */,
 				70C7ADA1204B9AC4007E0DAD /* AppCoordinator.swift */,
 				70C7ADAF204C757B007E0DAD /* Utilities.swift */,
+				70C7ADBE204CE8EA007E0DAD /* Project List */,
 				70C7ADAC204C7170007E0DAD /* Task List */,
 				70C7ADAB204C7161007E0DAD /* Calendar */,
 				70C7AD9D204B9A02007E0DAD /* Task.swift */,
+				70C7ADBF204CE945007E0DAD /* Project.swift */,
 				70C7AD9F204B9A57007E0DAD /* TaskManager.swift */,
+				70C7ADB8204CA042007E0DAD /* Storage.swift */,
+				70C7ADB5204C8AF9007E0DAD /* Views */,
 				70C7AD92204B99E0007E0DAD /* Assets.xcassets */,
 				70C7AD94204B99E0007E0DAD /* LaunchScreen.storyboard */,
 				70C7AD97204B99E0007E0DAD /* Info.plist */,
@@ -100,8 +118,27 @@
 			children = (
 				70C7ADA3204B9B97007E0DAD /* TaskListViewController.swift */,
 				70C7ADA5204B9F70007E0DAD /* TaskTableViewCell.swift */,
+				70C7ADB1204C82D3007E0DAD /* TaskViewController.swift */,
 			);
 			path = "Task List";
+			sourceTree = "<group>";
+		};
+		70C7ADB5204C8AF9007E0DAD /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				70C7ADB3204C88B4007E0DAD /* TextFieldTableViewCell.swift */,
+				70C7ADB6204C8C14007E0DAD /* DatePickerTableViewCell.swift */,
+				70C7ADBA204CE3B0007E0DAD /* PickerTableViewCell.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		70C7ADBE204CE8EA007E0DAD /* Project List */ = {
+			isa = PBXGroup;
+			children = (
+				70C7ADBC204CE8E6007E0DAD /* ProjectListViewController.swift */,
+			);
+			path = "Project List";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -180,12 +217,19 @@
 				70C7ADB0204C757B007E0DAD /* Utilities.swift in Sources */,
 				70C7ADAA204C5C2C007E0DAD /* ScheduleHourSeparator.swift in Sources */,
 				70C7ADA6204B9F70007E0DAD /* TaskTableViewCell.swift in Sources */,
+				70C7ADBB204CE3B0007E0DAD /* PickerTableViewCell.swift in Sources */,
+				70C7ADB7204C8C14007E0DAD /* DatePickerTableViewCell.swift in Sources */,
+				70C7ADBD204CE8E6007E0DAD /* ProjectListViewController.swift in Sources */,
+				70C7ADB2204C82D3007E0DAD /* TaskViewController.swift in Sources */,
+				70C7ADB4204C88B4007E0DAD /* TextFieldTableViewCell.swift in Sources */,
 				70C7AD8E204B99E0007E0DAD /* CalendarViewController.swift in Sources */,
 				70C7AD9E204B9A02007E0DAD /* Task.swift in Sources */,
 				70C7ADA2204B9AC4007E0DAD /* AppCoordinator.swift in Sources */,
 				70C7ADA0204B9A57007E0DAD /* TaskManager.swift in Sources */,
 				70C7AD8C204B99E0007E0DAD /* AppDelegate.swift in Sources */,
 				70C7ADA4204B9B97007E0DAD /* TaskListViewController.swift in Sources */,
+				70C7ADB9204CA042007E0DAD /* Storage.swift in Sources */,
+				70C7ADC0204CE945007E0DAD /* Project.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
