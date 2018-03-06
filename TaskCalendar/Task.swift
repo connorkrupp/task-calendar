@@ -57,6 +57,7 @@ class Task: Codable {
     var subtitle: String? = nil
     var dueDate: Date? = nil
     var color: EventColor = EventColor.orange
+    var isFromCalendar = false
 
     func offsetFrom(date other: Date) -> Time.Offset? {
         guard let workTime = self.workTime else { return nil }

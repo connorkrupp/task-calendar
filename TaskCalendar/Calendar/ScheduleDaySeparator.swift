@@ -10,30 +10,26 @@ import UIKit
 
 class ScheduleDaySeparator: UICollectionReusableView {
 
-    let hourLabel = UILabel()
+    let dayLabel = UILabel()
+    let dateLabel = UILabel()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
 
-        let separator = UIView()
-        separator.backgroundColor = UIColor.lightGray
-        separator.translatesAutoresizingMaskIntoConstraints = false
+        self.dayLabel.translatesAutoresizingMaskIntoConstraints = false
+        self.dayLabel.textColor = UIColor.black
 
-        self.hourLabel.translatesAutoresizingMaskIntoConstraints = false
-        self.hourLabel.textColor = UIColor.lightGray
-        self.hourLabel.textAlignment = .right
+        self.dateLabel.translatesAutoresizingMaskIntoConstraints = false
+        self.dateLabel.textColor = UIColor.black
 
-        self.addSubview(separator)
-        self.addSubview(self.hourLabel)
+        self.addSubview(self.dayLabel)
+        self.addSubview(self.dateLabel)
 
         NSLayoutConstraint.activate([
-            self.hourLabel.widthAnchor.constraint(equalToConstant: 60),
-            self.hourLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 2),
-            self.hourLabel.centerYAnchor.constraint(equalTo: self.centerYAnchor, constant: 0),
-            separator.heightAnchor.constraint(equalToConstant: 1),
-            separator.leadingAnchor.constraint(equalTo: self.hourLabel.trailingAnchor, constant: 12),
-            separator.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: 0),
-            separator.centerYAnchor.constraint(equalTo: self.centerYAnchor, constant: 0),
+            self.dayLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 60),
+            self.dayLabel.centerYAnchor.constraint(equalTo: self.centerYAnchor, constant: 0),
+            self.dateLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -20),
+            self.dateLabel.lastBaselineAnchor.constraint(equalTo: self.dayLabel.lastBaselineAnchor, constant: 0),
         ])
     }
 

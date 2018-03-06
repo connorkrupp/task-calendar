@@ -21,9 +21,15 @@ class CalendarEventCollectionViewCell: UICollectionViewCell {
         contentStackView.distribution = .fill
         contentStackView.translatesAutoresizingMaskIntoConstraints = false
 
+        self.layer.borderColor = UIColor.black.cgColor
+        self.layer.borderWidth = 1
+
+        self.nameLabel.adjustsFontForContentSizeCategory = true
+        self.nameLabel.adjustsFontSizeToFitWidth = true
+
         self.addSubview(contentStackView)
 
-        contentStackView.constrain(within: self, constant: 10)
+        contentStackView.constrain(within: self, constant: 4)
     }
 
     required init?(coder aDecoder: NSCoder) {

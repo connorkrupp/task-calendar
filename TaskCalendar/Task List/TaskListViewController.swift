@@ -67,6 +67,7 @@ class TaskListViewController: UITableViewController, TaskManagerChangeObserver, 
         }
         let task = self.taskManager.tasks[indexPath.row]
 
+        cell.completionButton.isHidden = task.isFromCalendar
         cell.titleLabel.text = task.name ?? "New Task"
         cell.subtitleLabel.text = task.subtitle ?? ""
         cell.subtitleLabel.isHidden = cell.subtitleLabel.text?.isEmpty ?? true
@@ -104,7 +105,7 @@ class TaskListViewController: UITableViewController, TaskManagerChangeObserver, 
         self.tableView.reloadRows(at: [self.indexPath(for: task)], with: .automatic)
     }
 
-    func taskManagerDidComplete(task: Task) {
-        self.tableView.deleteRows(at: [self.indexPath(for: task)], with: .automatic)
+    func taskManagerDidComplete(task: Task, at index: Int) {
+        self.tableView.deleteRows(at: [IndexPath(row: index, section: 0)], with: .automatic)
     }
 }

@@ -24,6 +24,7 @@ class CalendarDayLayout: UICollectionViewLayout {
 
     enum SupplementaryViewKind: String {
         case Separator = "Separator"
+        case Header = "Header"
     }
 
     // MARK: Properties
@@ -50,6 +51,7 @@ class CalendarDayLayout: UICollectionViewLayout {
         return true
     }
 
+    let headerHeight: CGFloat = 0
     let rowHeight: CGFloat = 55.0
     let separatorHeight: CGFloat = 22.0
 
@@ -60,7 +62,7 @@ class CalendarDayLayout: UICollectionViewLayout {
     }
 
     private func heightFor(section: Int) -> CGFloat {
-        return self.rowHeight * CGFloat(self.dataSource.numberOfRowsIn(section: section))
+        return self.headerHeight + self.rowHeight * CGFloat(self.dataSource.numberOfRowsIn(section: section))
     }
 
     // MARK: Cache
@@ -161,7 +163,7 @@ class CalendarDayLayout: UICollectionViewLayout {
         let dropLocation = CGPoint(x: location.x, y: location.y + dragInfo.offset.y - dragInfo.view.frame.size.height / 2)
 
         let section = self.section(at: dropLocation)!
-        let sectionOffset = self.heightFor(sections: 0..<section)
+        let sectionOffset = self.heightFor(sections: 0..<section) + self.headerHeight
         let numRows = CGFloat(self.dataSource.numberOfRowsIn(section: section))
         let partialRow = (dropLocation.y - sectionOffset) / self.heightFor(section: section) * numRows
         let fullRow = floor(partialRow)
@@ -217,9 +219,11 @@ class CalendarDayLayout: UICollectionViewLayout {
     override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes] {
         let layoutAttributes = sectionRange.reduce([UICollectionViewLayoutAttributes]()) { layoutAttributes, section in
 
-            let separatorLayoutAttributes: [UICollectionViewLayoutAttributes] = (1..<(self.dataSource.numberOfRowsIn(section: section))).map { row in
+            let separatorLayoutAttributes: [UICollectionViewLayoutAttributes] = (0..<(self.dataSource.numberOfRowsIn(section: section))).map { row in
                 return self.layoutAttributesForSupplementaryView(ofKind: SupplementaryViewKind.Separator.rawValue, at: IndexPath(item: row, section: section))!
             }
+
+            //let headerLayoutAttributes = [self.layoutAttributesForSupplementaryView(ofKind: SupplementaryViewKind.Header.rawValue, at: IndexPath(item: 0, section: section))!]
 
             let cellLayoutAttributes: [UICollectionViewLayoutAttributes] = self.itemRangeFor(section: section).map { item in
                 return self.layoutAttributesForItem(at: IndexPath(item: item, section: section))!
@@ -234,13 +238,17 @@ class CalendarDayLayout: UICollectionViewLayout {
     override func layoutAttributesForSupplementaryView(ofKind elementKind: String, at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
         let layoutAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: elementKind, with: indexPath)
 
-        let headerHeight: CGFloat = 0
         let sectionOffset: CGFloat = self.heightFor(sections: 0..<indexPath.section)
 
         switch SupplementaryViewKind(rawValue: elementKind)! {
         case .Separator:
             layoutAttributes.frame = CGRect(x: 0.0, y: sectionOffset + headerHeight + CGFloat(indexPath.row) * rowHeight - separatorHeight / 2.0, width: contentSize.width, height: self.separatorHeight)
             layoutAttributes.zIndex = -1
+
+        case .Header:
+            let headerOffset = min(max(collectionView!.contentInset.top + collectionView!.bounds.origin.y, self.heightFor(sections: 0..<indexPath.section)), self.heightFor(sections: 0..<indexPath.section + 1) - headerHeight)
+            layoutAttributes.frame = CGRect(x: 0.0, y: headerOffset, width: contentSize.width, height: headerHeight)
+            layoutAttributes.zIndex = Int.max - 3
         }
 
         return layoutAttributes

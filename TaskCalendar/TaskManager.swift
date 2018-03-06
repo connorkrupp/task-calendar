@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import EventKit
 
 /**
  Protocol for TaskManager notifying observers of changes in available tasks.
@@ -14,7 +15,7 @@ import Foundation
 protocol TaskManagerChangeObserver: class {
     func taskManagerDidAdd(task: Task)
     func taskManagerDidUpdate(task: Task)
-    func taskManagerDidComplete(task: Task)
+    func taskManagerDidComplete(task: Task, at index: Int)
 }
 
 class TaskManager {
@@ -28,10 +29,33 @@ class TaskManager {
         if Storage.fileExists(TaskManager.storageFilename, in: .documents) {
             self.tasks = Storage.retrieve(TaskManager.storageFilename, from: .documents, as: [Task].self)
         }
+
+        let eventStore = EKEventStore()
+        eventStore.requestAccess(to: .event) { (access, err) in
+            let endDate = Date(timeIntervalSinceNow: 60*60*24*5)
+            let pred = eventStore.predicateForEvents(withStart: Date(), end: endDate, calendars: nil)
+            let events = eventStore.events(matching: pred)
+
+            DispatchQueue.main.async {
+                for event in events {
+                    let task = Task()
+
+                    task.name = event.title
+                    task.color = Task.EventColor.blue
+                    task.subtitle = "From Calendar"
+
+                    let duration = Calendar.current.dateComponents([.minute], from: event.startDate, to: event.endDate).minute ?? 0
+                    task.workTime = Task.WorkTimeInfo(startDate: event.startDate, duration: duration)
+                    task.isFromCalendar = true
+
+                    self.add(task: task)
+                }
+            }
+        }
     }
 
     func save() {
-        Storage.store(self.tasks, to: .documents, as: TaskManager.storageFilename)
+        Storage.store(self.tasks.filter { !$0.isFromCalendar }, to: .documents, as: TaskManager.storageFilename)
     }
 
     func save(task: Task) {
@@ -61,7 +85,7 @@ class TaskManager {
         self.tasks.remove(at: index)
 
         for observer in self.observers {
-            observer.taskManagerDidComplete(task: task)
+            observer.taskManagerDidComplete(task: task, at: index)
         }
 
         self.save()

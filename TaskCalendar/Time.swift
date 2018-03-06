@@ -14,10 +14,8 @@ struct Time {
     static let numberOfHoursInDay = 24
     static let numberOfMinutesInHour = 60
 
-    static var today: Date? {
-        let components = Calendar.current.dateComponents([.year, .month, .day], from: Date())
-
-        return Calendar.current.date(from: components)
+    static var today: Date {
+        return Calendar.current.startOfDay(for: Date())
     }
 
     struct Offset {

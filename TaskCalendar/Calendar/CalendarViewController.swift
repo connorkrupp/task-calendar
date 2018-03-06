@@ -25,7 +25,7 @@ class CalendarViewController: UICollectionViewController, CalendarDayLayoutDataS
     func startPartialRowForItem(at indexPath: IndexPath) -> Double {
         let task = self.task(for: indexPath)
 
-        guard let today = Time.today, let offset = task.offsetFrom(date: today) else { return 0.0 }
+        guard let offset = task.offsetFrom(date: Time.today) else { return 0.0 }
 
         return Double(offset.hours) + Double(offset.minutes) / Double(Time.numberOfMinutesInHour)
     }
@@ -72,6 +72,7 @@ class CalendarViewController: UICollectionViewController, CalendarDayLayoutDataS
 
         self.collectionView?.register(CalendarEventCollectionViewCell.self, forCellWithReuseIdentifier: "asdf")
         self.collectionView?.register(ScheduleHourSeparator.self, forSupplementaryViewOfKind: CalendarDayLayout.SupplementaryViewKind.Separator.rawValue, withReuseIdentifier: "HourSeparator")
+        self.collectionView?.register(ScheduleDaySeparator.self, forSupplementaryViewOfKind: CalendarDayLayout.SupplementaryViewKind.Header.rawValue, withReuseIdentifier: "DaySeparator")
 
         self.taskManager.register(self)
     }
@@ -89,7 +90,7 @@ class CalendarViewController: UICollectionViewController, CalendarDayLayoutDataS
     }
 
     var firstDayInView: Int {
-        let components = Calendar.current.dateComponents([.day], from: Time.today!)
+        let components = Calendar.current.dateComponents([.day], from: Time.today)
 
         return components.day!
     }
@@ -125,21 +126,17 @@ class CalendarViewController: UICollectionViewController, CalendarDayLayoutDataS
             hourSeparator.hourLabel.text = "\(hour == 0 ? 12 : hour) \((indexPath.row % 24) < 12 ? "AM" : "PM" )"
 
             return hourSeparator
+        case .Header:
+            let dayHeader = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: "DaySeparator", for: indexPath) as! ScheduleDaySeparator
+
+            dayHeader.dayLabel.text = "Monday"
+            dayHeader.dateLabel.text = "1/1/15"
+
+            return dayHeader
         }
     }
 
     // MARK: TaskManagerChangeObserver
-
-    private func task(for indexPath: IndexPath) -> Task {
-        return self.tasksInDay(day: self.firstDayInView + indexPath.section)[indexPath.row]
-    }
-
-    private func indexPath(for task: Task) -> IndexPath {
-        let section = task.offsetFrom(date: Time.today!)!.days
-        let row = self.tasksInDay(day: self.firstDayInView + section).index { $0.id == task.id }!
-
-        return IndexPath(row: row, section: section)
-    }
 
     func taskManagerDidAdd(task: Task) {
         self.collectionView?.insertItems(at: [self.indexPath(for: task)])
@@ -147,11 +144,28 @@ class CalendarViewController: UICollectionViewController, CalendarDayLayoutDataS
 
     func taskManagerDidUpdate(task: Task) {
         self.collectionView?.reloadData()
-        //self.collectionView?.reloadItems(at: [self.indexPath(for: task)])
     }
 
-    func taskManagerDidComplete(task: Task) {
-        self.collectionView?.deleteItems(at: [self.indexPath(for: task)])
+    func taskManagerDidComplete(task: Task, at index: Int) {
+        self.collectionView?.reloadData()
     }
+
+    // MARK: Helpers
+
+    private func task(for indexPath: IndexPath) -> Task {
+        return self.tasksInDay(day: self.firstDayInView + indexPath.section)[indexPath.row]
+    }
+
+    private func section(for task: Task) -> Int {
+        return task.offsetFrom(date: Time.today)!.days
+    }
+
+    private func indexPath(for task: Task) -> IndexPath {
+        let section = self.section(for: task)
+        let row = self.tasksInDay(day: self.firstDayInView + section).index { $0.id == task.id }!
+
+        return IndexPath(row: row, section: section)
+    }
+
 }
 
